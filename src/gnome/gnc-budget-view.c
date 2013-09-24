@@ -112,7 +112,6 @@ static void gbv_selection_changed_cb(
     GtkTreeSelection *selection, GncBudgetView *view);
 #endif
 static void gbv_treeview_resized_cb(GtkWidget* widget, GtkAllocation* allocation, GncBudgetView* view);
-static void gbv_column_resized_cb(GtkWidget* widget, GtkAllocation* allocation, GtkTreeViewColumn* col);
 static gnc_numeric gbv_get_accumulated_budget_amount(GncBudget* budget,
                                        Account* account, guint period_num);
 
@@ -555,22 +554,13 @@ gbv_key_press_cb(GtkWidget *treeview, GdkEventKey *event, gpointer userdata)
 }
 
 static void
-gbv_column_resized_cb(GtkWidget* widget, GtkAllocation* allocation, GtkTreeViewColumn* col)
-{
-    guint period_num;
-
-    period_num = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(col),
-                                  "period_num"));
-    printf("Col %d: x=%d y=%d w=%d h=%d\n", period_num, allocation->x, allocation->y, allocation->width, allocation->height);
-}
-
-static void
 gbv_treeview_resized_cb(GtkWidget* widget, GtkAllocation* allocation, GncBudgetView* view)
 {
     guint ncols;
     GncBudgetViewPrivate* priv;
     guint i;
 
+    ENTER("");
     priv = GNC_BUDGET_VIEW_GET_PRIVATE(view);
 
     /* Num cols is number of budget periods + 1 for name.  Ignore totals column.  We
@@ -601,6 +591,7 @@ gbv_treeview_resized_cb(GtkWidget* widget, GtkAllocation* allocation, GncBudgetV
             gtk_tree_view_column_set_max_width(totals_view_col, col_width);
         }
     }
+    LEAVE("");
 }
 
 static void
@@ -976,7 +967,7 @@ gbv_create_totals_column(GncBudgetView* view, gint period_num)
     g_object_set_data(G_OBJECT(col), "period_num", GUINT_TO_POINTER(period_num));
     if (period_num >= 0)
     {
-        gint col_width = 86;
+        gint col_width = 60;
         gtk_tree_view_column_set_min_width(col, col_width);
         gtk_tree_view_column_set_max_width(col, col_width);
     }
@@ -1044,8 +1035,6 @@ gnc_budget_view_refresh(GncBudgetView *view)
         g_object_set_data(G_OBJECT(col), "budget", priv->budget);
         g_object_set_data(G_OBJECT(col), "period_num",
                           GUINT_TO_POINTER(num_periods_visible));
-        g_signal_connect(G_OBJECT(col), "size-allocate",
-                     G_CALLBACK(gbv_column_resized_cb), col);
         col_list = g_list_append(col_list, col);
 
         renderer_list = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(col));
@@ -1059,6 +1048,7 @@ gnc_budget_view_refresh(GncBudgetView *view)
         col = gbv_create_totals_column(view, num_periods_visible);
         if (col != NULL)
         {
+            gtk_tree_view_append_column(priv->totals_tree_view, col);
             totals_col_list = g_list_append(totals_col_list, col);
         }
 
@@ -1075,6 +1065,10 @@ gnc_budget_view_refresh(GncBudgetView *view)
         g_object_set_data(G_OBJECT(priv->total_col), "budget", priv->budget);
 
         col = gbv_create_totals_column(view, -1);
+        if (col != NULL)
+        {
+           gtk_tree_view_append_column(priv->totals_tree_view, col);
+        }
     }
 
     gbv_refresh_col_titles(view);
