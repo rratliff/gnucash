@@ -48,7 +48,8 @@ gncscmreportmod_DATA = \
    register.scm \
    sx-summary.scm \
 	 trial-balance.scm \
-   transaction.scm
+   transaction.scm \
+   advanced-budget.scm
 
 
 
