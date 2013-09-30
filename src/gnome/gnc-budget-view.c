@@ -318,6 +318,7 @@ gbv_create_widget(GncBudgetView *view)
     GtkWidget *scrolled_window;
     const gchar *budget_guid_str;
     GtkVBox* vbox;
+    GtkWidget* inner_vbox;
     GtkListStore* totals_tree_model;
     GtkTreeView* totals_tree_view;
     GtkTreeViewColumn* totals_title_col;
@@ -334,9 +335,13 @@ gbv_create_widget(GncBudgetView *view)
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
                                    GTK_POLICY_AUTOMATIC,
                                    GTK_POLICY_AUTOMATIC);
+    DEBUG("shadow type %i", gtk_scrolled_window_get_shadow_type(GTK_SCROLLED_WINDOW(scrolled_window)));
     gtk_widget_show(scrolled_window);
     gtk_box_pack_start(GTK_BOX(vbox), scrolled_window, /*expand*/TRUE, /*fill*/TRUE, 0);
 
+    inner_vbox = gtk_vbox_new(FALSE, 0);
+    gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window), GTK_WIDGET(inner_vbox));
+    gtk_widget_show(GTK_WIDGET(inner_vbox));
     tree_view = gnc_tree_view_account_new(FALSE);
 
     g_object_set(G_OBJECT(tree_view), "gconf-section", priv->gconf_section, NULL);
@@ -363,7 +368,7 @@ gbv_create_widget(GncBudgetView *view)
 #endif
     gtk_tree_view_set_headers_visible(tree_view, TRUE);
     gtk_widget_show(GTK_WIDGET(tree_view));
-    gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(tree_view));
+    gtk_box_pack_start(GTK_BOX(inner_vbox), GTK_WIDGET(tree_view), /*expand*/TRUE, /*fill*/TRUE, 0);
     priv->fd->tree_view = GNC_TREE_VIEW_ACCOUNT(priv->tree_view);
     gnc_tree_view_account_set_filter(
         GNC_TREE_VIEW_ACCOUNT(tree_view),
@@ -393,11 +398,11 @@ gbv_create_widget(GncBudgetView *view)
     gtk_tree_view_column_set_expand(totals_title_col, TRUE);
     gtk_tree_view_append_column(totals_tree_view, totals_title_col);
 
-    gtk_box_pack_end(GTK_BOX(vbox), GTK_WIDGET(totals_tree_view), /*expand*/FALSE, /*fill*/TRUE, 0);
+    gtk_box_pack_end(GTK_BOX(inner_vbox), GTK_WIDGET(totals_tree_view), /*expand*/FALSE, /*fill*/TRUE, 0);
 
     h_separator = gtk_hseparator_new();
     gtk_widget_show(h_separator);
-    gtk_box_pack_end(GTK_BOX(vbox), h_separator, /*expand*/FALSE, /*fill*/TRUE, 0);
+    gtk_box_pack_end(GTK_BOX(inner_vbox), h_separator, /*expand*/FALSE, /*fill*/TRUE, 0);
 
     gnc_budget_view_refresh(view);
 }
