@@ -1003,12 +1003,13 @@ gbv_create_totals_column(GncBudgetView* view, gint period_num)
     gtk_tree_view_column_set_cell_data_func(col, renderer, totals_col_source, view, NULL);
     g_object_set_data(G_OBJECT(col), "budget", priv->budget);
     g_object_set_data(G_OBJECT(col), "period_num", GUINT_TO_POINTER(period_num));
-    if (period_num >= 0)
+    gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
+    /*if (period_num >= 0)
     {
         gint col_width = 60;
         gtk_tree_view_column_set_min_width(col, col_width);
         gtk_tree_view_column_set_max_width(col, col_width);
-    }
+    }*/
 
     return col;
 }
