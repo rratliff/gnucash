@@ -336,7 +336,6 @@ gbv_create_widget(GncBudgetView *view)
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
                                    GTK_POLICY_AUTOMATIC,
                                    GTK_POLICY_NEVER);
-    DEBUG("shadow type %i", gtk_scrolled_window_get_shadow_type(GTK_SCROLLED_WINDOW(scrolled_window)));
     gtk_widget_show(scrolled_window);
     gtk_box_pack_start(GTK_BOX(vbox), scrolled_window, /*expand*/TRUE, /*fill*/TRUE, 0);
 
@@ -567,22 +566,6 @@ gbv_key_press_cb(GtkWidget *treeview, GdkEventKey *event, gpointer userdata)
     return TRUE;
 }
 
-static void show_column_info(GtkTreeViewColumn* col, gint i)
-{
-            DEBUG("%i: %s", i, gtk_tree_view_column_get_title(col));
-            DEBUG("%i: width was %i, visible %s", i,
-                gtk_tree_view_column_get_width(col),
-                (gtk_tree_view_column_get_visible(col) ? "true": "false"));
-            DEBUG("%i: sizing type is %i", i, gtk_tree_view_column_get_sizing (col));
-            DEBUG("%i: expand %s", i,
-                (gtk_tree_view_column_get_expand(col) ? "true" : "false"));
-            DEBUG("%i: min %i, max %i", i,
-                gtk_tree_view_column_get_min_width(col),
-                gtk_tree_view_column_get_max_width(col));
-            DEBUG("%i: fixed width %i", i,
-                gtk_tree_view_column_get_fixed_width(col));
-}
-
 static void
 gbv_treeview_resized_cb(GtkWidget* widget, GtkAllocation* allocation, GncBudgetView* view)
 {
@@ -591,7 +574,6 @@ gbv_treeview_resized_cb(GtkWidget* widget, GtkAllocation* allocation, GncBudgetV
     gint i;
     gint j;
     GList *columns;
-    GString *total_column_title, *this_column_title;
 
     ENTER("");
     priv = GNC_BUDGET_VIEW_GET_PRIVATE(view);
@@ -600,10 +582,8 @@ gbv_treeview_resized_cb(GtkWidget* widget, GtkAllocation* allocation, GncBudgetV
     columns = gtk_tree_view_get_columns(GTK_TREE_VIEW(priv->tree_view));
     ncols = g_list_length(columns);
     g_list_free(columns);
-    DEBUG("Number of columns was %i", ncols);
     /* i is the column we are examining
      * j is the corresponding column in totals_tree_view */
-    total_column_title = g_string_new("Total");
     for (i = 0, j = 0; i < ncols; ++i)
     {
         gint col_width;
@@ -612,37 +592,19 @@ gbv_treeview_resized_cb(GtkWidget* widget, GtkAllocation* allocation, GncBudgetV
 
         tree_view_col = gtk_tree_view_get_column(priv->tree_view, i);
 
-        /* If the column is visible, but not the column titled "Total".
-         * If we set the width of this last column, the user won't be able
-         * to shrink the display */
-        this_column_title = g_string_new(gtk_tree_view_column_get_title(tree_view_col));
         if (gtk_tree_view_column_get_visible(tree_view_col))
         {
             col_width = gtk_tree_view_column_get_width(tree_view_col);
-            DEBUG("------");
-            show_column_info(tree_view_col, i);
             totals_view_col = gtk_tree_view_get_column(priv->totals_tree_view, j);
-            show_column_info(totals_view_col, j);
-            /* Set total view col's width the same. */
+            /* Don't set the width of the first column, which was set up
+             * in gbv_create_widget. It has a sizing of GROW_ONLY. */
             if (gtk_tree_view_column_get_sizing(totals_view_col) == GTK_TREE_VIEW_COLUMN_FIXED)
             {
                 gtk_tree_view_column_set_fixed_width(totals_view_col, col_width);
-            } else {
-                /*gtk_tree_view_column_set_max_width(totals_view_col, col_width);
-                gtk_tree_view_column_set_min_width(totals_view_col, col_width);*/
             }
             j++;
         }
-        /*if (g_string_equal(total_column_title, this_column_title))
-        {
-            DEBUG("------");
-            show_column_info(tree_view_col, i);
-            totals_view_col = gtk_tree_view_get_column(priv->totals_tree_view, j);
-            show_column_info(totals_view_col, j);
-        }*/
-        g_string_free(this_column_title, TRUE);
     }
-    g_string_free(total_column_title, TRUE);
     LEAVE("");
 }
 
@@ -1018,12 +980,6 @@ gbv_create_totals_column(GncBudgetView* view, gint period_num)
     g_object_set_data(G_OBJECT(col), "budget", priv->budget);
     g_object_set_data(G_OBJECT(col), "period_num", GUINT_TO_POINTER(period_num));
     gtk_tree_view_column_set_sizing(col, GTK_TREE_VIEW_COLUMN_FIXED);
-    /*if (period_num >= 0)
-    {
-        gint col_width = 60;
-        gtk_tree_view_column_set_min_width(col, col_width);
-        gtk_tree_view_column_set_max_width(col, col_width);
-    }*/
 
     return col;
 }
