@@ -316,6 +316,7 @@ gbv_create_widget(GncBudgetView *view)
     GtkTreeSelection *selection;
     GtkTreeView *tree_view;
     GtkWidget *scrolled_window;
+    GtkWidget *inner_scrolled_window;
     const gchar *budget_guid_str;
     GtkVBox* vbox;
     GtkWidget* inner_vbox;
@@ -334,7 +335,7 @@ gbv_create_widget(GncBudgetView *view)
     scrolled_window = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
                                    GTK_POLICY_AUTOMATIC,
-                                   GTK_POLICY_AUTOMATIC);
+                                   GTK_POLICY_NEVER);
     DEBUG("shadow type %i", gtk_scrolled_window_get_shadow_type(GTK_SCROLLED_WINDOW(scrolled_window)));
     gtk_widget_show(scrolled_window);
     gtk_box_pack_start(GTK_BOX(vbox), scrolled_window, /*expand*/TRUE, /*fill*/TRUE, 0);
@@ -342,7 +343,14 @@ gbv_create_widget(GncBudgetView *view)
     inner_vbox = gtk_vbox_new(FALSE, 0);
     gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window), GTK_WIDGET(inner_vbox));
     gtk_widget_show(GTK_WIDGET(inner_vbox));
+
+    inner_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(inner_scrolled_window),
+                                   GTK_POLICY_NEVER,
+                                   GTK_POLICY_AUTOMATIC);
+    gtk_widget_show(inner_scrolled_window);
     tree_view = gnc_tree_view_account_new(FALSE);
+    gtk_container_add(GTK_CONTAINER(inner_scrolled_window), GTK_WIDGET(tree_view));
 
     g_object_set(G_OBJECT(tree_view), "gconf-section", priv->gconf_section, NULL);
 
@@ -368,7 +376,7 @@ gbv_create_widget(GncBudgetView *view)
 #endif
     gtk_tree_view_set_headers_visible(tree_view, TRUE);
     gtk_widget_show(GTK_WIDGET(tree_view));
-    gtk_box_pack_start(GTK_BOX(inner_vbox), GTK_WIDGET(tree_view), /*expand*/TRUE, /*fill*/TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(inner_vbox), GTK_WIDGET(inner_scrolled_window), /*expand*/TRUE, /*fill*/TRUE, 0);
     priv->fd->tree_view = GNC_TREE_VIEW_ACCOUNT(priv->tree_view);
     gnc_tree_view_account_set_filter(
         GNC_TREE_VIEW_ACCOUNT(tree_view),
