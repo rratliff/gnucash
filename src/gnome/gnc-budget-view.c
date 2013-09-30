@@ -390,6 +390,7 @@ gbv_create_widget(GncBudgetView *view)
     gtk_tree_view_set_model(totals_tree_view, GTK_TREE_MODEL(totals_tree_model));
 
     totals_title_col = gtk_tree_view_column_new_with_attributes("", gtk_cell_renderer_text_new(), "text", 0, NULL);
+    gtk_tree_view_column_set_expand(totals_title_col, TRUE);
     gtk_tree_view_append_column(totals_tree_view, totals_title_col);
 
     gtk_box_pack_end(GTK_BOX(vbox), GTK_WIDGET(totals_tree_view), /*expand*/FALSE, /*fill*/TRUE, 0);
@@ -614,8 +615,8 @@ gbv_treeview_resized_cb(GtkWidget* widget, GtkAllocation* allocation, GncBudgetV
             {
                 gtk_tree_view_column_set_fixed_width(totals_view_col, col_width);
             } else {
-                gtk_tree_view_column_set_max_width(totals_view_col, col_width);
-                gtk_tree_view_column_set_min_width(totals_view_col, col_width);
+                /*gtk_tree_view_column_set_max_width(totals_view_col, col_width);
+                gtk_tree_view_column_set_min_width(totals_view_col, col_width);*/
             }
             j++;
         }
