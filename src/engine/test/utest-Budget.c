@@ -2545,6 +2545,31 @@ test_gnc_set_budget_recurrence()
     gnc_budget_destroy(budget);
 }
 
+static void
+test_gnc_set_budget_account_period_value()
+{
+    QofBook *book = qof_book_new();
+    GncBudget* budget = gnc_budget_new(book);
+    Account *acc;
+    gnc_numeric val;
+    acc = gnc_account_create_root(book);
+
+    g_assert(!gnc_budget_is_account_period_value_set(budget, acc, 0));
+    gnc_budget_set_account_period_value(budget, acc, 0, gnc_numeric_create(100,1));
+    g_assert(gnc_budget_is_account_period_value_set(budget, acc, 0));
+    val = gnc_budget_get_account_period_value(budget, acc, 0);
+    g_assert (gnc_numeric_equal (val, gnc_numeric_create (100, 1)));
+
+    /* Budget has 12 periods by default, starting from 0 */
+    g_assert(!gnc_budget_is_account_period_value_set(budget, acc, 12));
+    gnc_budget_set_account_period_value(budget, acc, 13, gnc_numeric_create(100,1));
+    g_assert(!gnc_budget_is_account_period_value_set(budget, acc, 12));
+
+    g_object_unref(book);
+    g_object_unref(acc);
+    gnc_budget_destroy(budget);
+}
+
 void
 test_suite_budget(void)
 {
@@ -2553,6 +2578,7 @@ test_suite_budget(void)
     GNC_TEST_ADD_FUNC(suitename, "gnc_budget_set_description()", test_gnc_set_budget_description);
     GNC_TEST_ADD_FUNC(suitename, "gnc_budget_set_num_periods()", test_gnc_set_budget_num_periods);
     GNC_TEST_ADD_FUNC(suitename, "gnc_budget_set_recurrence()", test_gnc_set_budget_recurrence);
+    GNC_TEST_ADD_FUNC(suitename, "gnc_budget_set_account_period_value()", test_gnc_set_budget_account_period_value);
 
 #if 0
     GNC_TEST_ADD_FUNC (suitename, "gnc set account separator", test_gnc_set_account_separator);
