@@ -2561,9 +2561,8 @@ test_gnc_set_budget_account_period_value()
     g_assert (gnc_numeric_equal (val, gnc_numeric_create (100, 1)));
 
     /* Budget has 12 periods by default, starting from 0 */
-    g_assert(!gnc_budget_is_account_period_value_set(budget, acc, 12));
+    g_test_expect_message(GNC_MOD_ENGINE, G_LOG_LEVEL_WARNING, "*Period*number*higher*than*num_periods");
     gnc_budget_set_account_period_value(budget, acc, 13, gnc_numeric_create(100,1));
-    g_assert(!gnc_budget_is_account_period_value_set(budget, acc, 12));
 
     g_object_unref(book);
     g_object_unref(acc);

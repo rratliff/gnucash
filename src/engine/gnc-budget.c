@@ -507,9 +507,10 @@ gnc_budget_set_account_period_value(GncBudget *budget, const Account *account,
     gchar path[BUF_SIZE];
     gchar *bufend;
 
-    if (period_num > GET_PRIVATE(budget)->num_periods)
+    if (period_num > GET_PRIVATE(budget)->num_periods) {
+        PWARN("Period number %i is higher than num_periods", period_num);
         return;
-    /* FIXME There's no error reporting if this function fails */
+    }
 
     gnc_budget_begin_edit(budget);
     frame = qof_instance_get_slots(QOF_INSTANCE(budget));
