@@ -2573,6 +2573,7 @@ test_gnc_set_budget_account_period_value()
     oldlogger = g_log_set_default_handler ((GLogFunc)test_null_handler, &check);
     g_test_log_set_fatal_handler ((GTestLogFatalFunc)test_checked_handler, &check);
     gnc_budget_set_account_period_value(budget, acc, 12, gnc_numeric_create(100,1));
+    g_assert_cmpint (check.hits, ==, 1);
     g_log_set_default_handler (oldlogger, NULL);
 
     g_object_unref(book);
