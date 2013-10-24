@@ -2552,6 +2552,14 @@ test_gnc_set_budget_account_period_value()
     GncBudget* budget = gnc_budget_new(book);
     Account *acc;
     gnc_numeric val;
+
+    guint log_level = G_LOG_LEVEL_WARNING | G_LOG_FLAG_FATAL;
+    gchar *log_domain = "gnc.engine";
+    gchar *msg = "[gnc_budget_set_account_period_value()] Period 12 does not exist";
+    guint hdlr;
+    TestErrorStruct check = { log_level, log_domain, msg, 0 };
+    GLogFunc oldlogger;
+
     acc = gnc_account_create_root(book);
 
     g_assert(!gnc_budget_is_account_period_value_set(budget, acc, 0));
@@ -2560,9 +2568,12 @@ test_gnc_set_budget_account_period_value()
     val = gnc_budget_get_account_period_value(budget, acc, 0);
     g_assert (gnc_numeric_equal (val, gnc_numeric_create (100, 1)));
 
-    /* Budget has 12 periods by default, starting from 0 */
-    g_test_expect_message(GNC_MOD_ENGINE, G_LOG_LEVEL_WARNING, "*Period*number*higher*than*num_periods");
-    gnc_budget_set_account_period_value(budget, acc, 13, gnc_numeric_create(100,1));
+    /* Budget has 12 periods by default, numbered from 0 to 11. Setting
+     * period 12 should throw an error. */
+    oldlogger = g_log_set_default_handler ((GLogFunc)test_null_handler, &check);
+    g_test_log_set_fatal_handler ((GTestLogFatalFunc)test_checked_handler, &check);
+    gnc_budget_set_account_period_value(budget, acc, 12, gnc_numeric_create(100,1));
+    g_log_set_default_handler (oldlogger, NULL);
 
     g_object_unref(book);
     g_object_unref(acc);

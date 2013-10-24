@@ -507,8 +507,8 @@ gnc_budget_set_account_period_value(GncBudget *budget, const Account *account,
     gchar path[BUF_SIZE];
     gchar *bufend;
 
-    if (period_num > GET_PRIVATE(budget)->num_periods) {
-        PWARN("Period number %i is higher than num_periods", period_num);
+    if (period_num >= GET_PRIVATE(budget)->num_periods) {
+        PWARN("Period %i does not exist", period_num);
         return;
     }
 
